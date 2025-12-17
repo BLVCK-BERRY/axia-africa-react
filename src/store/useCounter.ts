@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { createJSONStorage, devtools, persist } from "zustand/middleware";
+import { immer } from "zustand/middleware/immer";
 
 type CounterStoreType = {
   count1: number;
@@ -9,23 +11,46 @@ type CounterStoreType = {
   decrementCount2: () => void;
 };
 
-const initialState = { count1: 0, count2: 10 };
+const initialState = { count1: 0, count2: 0 };
 
-export const useCounterStore = create<CounterStoreType>((set, get) => ({
-  ...initialState,
-  incrementCount1: () => {
-    set((state) => ({ count1: state.count1 + 1 }));
-  },
-  incrementCount2: () => {
-    set((state) => ({ count2: state.count2 + 5 }));
-  },
-  decrementCount1: () => {
-    set((state) => ({ count1: state.count1 - 1 }));
-  },
-  decrementCount2: () => {
-    const count2 = get().count2;
-    if (count2 <= 5) return;
+export const useCounterStore = create<CounterStoreType>()(
+  // IDP
+  immer(
+    devtools(
+      persist(
+        (set, get) => ({
+          ...initialState,
+          incrementCount1: () => {
+            // set((state) => ({ count1: state.count1 + 1 })); // without immer
+            set((state) => {
+              state.count1++; // works
+            }); // with immer
+          },
+          incrementCount2: () => {
+            set((state) => {
+              state.count2 += 3;
+            });
+          },
+          decrementCount1: () => {
+            set((state) => {
+              state.count1--;
+            });
+          },
+          decrementCount2: () => {
+            const count2 = get().count2;
+            if (count2 <= 5) return;
 
-    set((state) => ({ count2: state.count2 - 5 }));
-  },
-}));
+            set((state) => {
+              state.count2 -= 5;
+            });
+          },
+        }),
+        {
+          name: "counter-store",
+          storage: createJSONStorage(() => sessionStorage),
+        }
+      ),
+      { enabled: import.meta.env.VITE_ENVIRONMENT === "development" }
+    )
+  )
+);
