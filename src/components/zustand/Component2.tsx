@@ -6,7 +6,7 @@ const Component2 = () => {
   const { count2, incrementCount2 } = useCounterStore(
     useShallow((state) => ({
       count2: state.count2,
-      incrementCount2: state.incrementCount2,
+      incrementCount2: state.actions.incrementCount2,
     }))
   ); // optimized
   return (

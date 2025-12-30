@@ -1,5 +1,5 @@
 import { useShallow } from "zustand/shallow";
-import { useCounterStore } from "../../store/useCounter";
+import { incrementCount1, useCounterStore } from "../../store/useCounter";
 // import { useEffect } from "react";
 
 // const count1 = useCounterStore.getState().count1; // no reaction
@@ -12,7 +12,7 @@ const Component1 = () => {
   const { count1, incrementCount1 } = useCounterStore(
     useShallow((state) => ({
       count1: state.count1,
-      incrementCount1: state.incrementCount1,
+      incrementCount1: state.actions.incrementCount1,
     }))
   );
 
